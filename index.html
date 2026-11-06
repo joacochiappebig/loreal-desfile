@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0e0c0b">
+  <title>Porque lo valen — L'Oréal Groupe × BIG</title>
+  <meta name="description" content="El desfile de BIG para L'Oréal Groupe: creadores del roster, una marca del grupo cada uno y su salida a la pasarela.">
+  <link rel="icon" href="assets/img/big.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/bodoni-moda.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/bodoni-moda-italic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script src="perfiles.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body class="is-loading">
+  <div class="loader" aria-hidden="true">
+    <div class="carga">
+      <p class="carga__etapa">Armando el backstage</p>
+      <div class="carga__barra"><i><b></b></i><i><b></b></i><i><b></b></i></div>
+    </div>
+  </div>
+
+  <!-- El escenario: la pasarela con su público, y arriba los creadores que desfilan -->
+  <div class="escenario" aria-label="La pasarela">
+    <canvas class="sala" aria-hidden="true"></canvas>
+    <div class="modelos"></div>
+    <div class="destellos" aria-hidden="true"></div>
+  </div>
+
+  <header class="top">
+    <div class="marca" aria-label="L'Oréal Groupe × BIG">
+      <span class="marca__loreal">L'ORÉAL<small>GROUPE</small></span>
+      <i aria-hidden="true">×</i>
+      <svg class="marca__big" viewBox="0 0 410.71 466.33" role="img" aria-label="BIG"><path d="M409.52,245.64l-.46-2.58c-9.26-60.88-80.63-99.4-137.14-71.74-88.45,35.5-151.22,123.57-151.14,223.45,0,3.49-.78,6.98-2.6,9.96-9.03,14.8-34.91,11.92-39.67-5.3-.81-2.92-.82-6-.26-8.97,21.94-117.86,112.53-218.09,223.62-260.77.71-.31,1.41-.64,2.1-1,52.05-30.85,35.16-119.08-25.55-127.52-4.12-.76-8.35-1.16-12.68-1.16H0v466.33h410.49c-.73-9.18,1.48-207.5-.97-220.69Z"/></svg>
+    </div>
+  </header>
+
+  <div class="titular">
+    <p class="kicker">El desfile de BIG para L'Oréal Groupe</p>
+    <h1>Porque lo <em>valen.</em></h1>
+    <p class="titular__bajada">Tocá la pasarela para sacar fotos. Tocá a un creador para ver su salida.</p>
+  </div>
+
+  <aside class="app" aria-label="Armá el desfile"></aside>
+
+  <noscript><p class="sin-js">Activá JavaScript para ver el desfile.</p></noscript>
+</body>
+</html>
