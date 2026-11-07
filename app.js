@@ -54,19 +54,13 @@
   const Z_PUERTA = 12, Z_POSE = 1.5, MARCAS = [5.2, 3.2, 2.05, 1.32];
   const pisoY = z => G.horizonte + (G.base - G.horizonte) / z;
 
-  function medir() {
-    const W = innerWidth, H = innerHeight, movil = W <= 900;
-    const ar = panel.getBoundingClientRect();
-    const x1 = movil ? W : ar.left - 8;
-    const techo = movil ? 56 : 0, piso = movil ? ar.top - 4 : H;
-    const alto = piso - techo;
-    const horizonte = techo + alto * (movil ? .36 : .44);
-    const base = piso - (movil ? 2 : alto * .025);
+  function medir() { // la pasarela vive en su módulo: se mide ahí, no en la ventana
+    const r = escenario.getBoundingClientRect(), W = Math.max(1, r.width), H = Math.max(1, r.height), movil = innerWidth <= 900;
+    const horizonte = H * (movil ? .34 : .4), base = H * .975;
     const CH = (base - horizonte) * (movil ? 1.06 : 1.12), CA = CH * 9 / 16, CW = CH * 100 / 280;
-    G = { W, H, movil, x1, cx: x1 / 2, techo, piso, horizonte, base, CH, CW, CA, R: CA * .8 };
+    G = { W, H, movil, x1: W, cx: W / 2, techo: 0, piso: H, horizonte, base, CH, CW, CA, R: CA * .8 };
     dpr = Math.min(2, devicePixelRatio || 1);
     sala.width = Math.round(W * dpr); sala.height = Math.round(H * dpr);
-    capa.style.setProperty('--cw', `${CW}px`); capa.style.setProperty('--ch', `${CH}px`);
     $$('.modelo', capa).forEach(el => { el.style.width = `${CW}px`; el.style.height = `${CH}px`; });
     pintarFondo();
   }
@@ -348,7 +342,7 @@
       panel.innerHTML = `<div class="tarjeta">
         <header class="cab">
           <p class="kicker">L'Oréal Groupe × BIG</p>
-          <h2>Armá el desfile</h2>
+          <h2>Armá el desfile.</h2>
           <p class="cab__bajada">En París, L'Oréal Paris salió a la pasarela a decir <em>Expresá tu valor</em>. Esta es la pasarela de BIG: cada salida es un creador con una marca del grupo, y la marca entra en su video de siempre.</p>
           <label class="buscar">${LUPA}<input type="search" placeholder="Buscar creador, marca o producto" aria-label="Buscar creador, marca o producto" value="${esc(filtro)}"></label>
           <div class="filtros" role="group" aria-label="División del grupo">${[{ id: 'todas', corto: 'Todas' }, ...DIVISIONES].map(d => `<button type="button" data-div="${d.id}" aria-pressed="${division === d.id}">${d.corto}</button>`).join('')}</div>
@@ -387,7 +381,7 @@
     desfile() {
       const sel = elegidos();
       panel.innerHTML = `<div class="tarjeta">
-        <header class="t__top t__top--simple"><button class="back" type="button" data-ir="lista" aria-label="Volver a la lista">${VOLVER}</button><h2>El desfile</h2></header>
+        <header class="t__top t__top--simple"><button class="back" type="button" data-ir="lista" aria-label="Volver a la lista">${VOLVER}</button><h2>Tu desfile.</h2></header>
         ${sel.length ? `<ul class="lista orden">${sel.map((i, n) => fila(P[i], i, n + 1)).join('')}</ul>` : '<p class="vacio">No hay salidas todavía. Volvé a la lista y sumá creadores.</p>'}
         <dl class="resumen">
           <div><dt>Salidas</dt><dd>${sel.length}</dd></div>
@@ -495,6 +489,11 @@
     vista = v; body.dataset.vista = v;
     vistas[v]();
     ritmo = v === 'perfil' ? .5 : v === 'listo' ? 2.5 : .9;
+    if (antes && antes !== v) {
+      const pr = panel.getBoundingClientRect(), vr = $('.config__vista').getBoundingClientRect();
+      const destino = scrollY + pr.top - (G?.movil ? 44 + vr.height + 8 : 64); // en el celular, debajo de la pasarela fija
+      if (scrollY > destino + 4) scrollTo({ top: destino, behavior: reduced ? 'auto' : 'smooth' });
+    }
     if (antes && antes !== v && !reduced) $$(':scope > *', panel).forEach((el, j) => el.animate([{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: j * 50, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' }));
   }
   function abrirPerfil(i) {
@@ -573,7 +572,7 @@
     if (d.otra !== undefined) { videos.fill(1); return ir('lista'); }
   });
   // tocar la sala es sacar una foto
-  sala.addEventListener('pointerdown', e => { flash(e.clientX, e.clientY, 34, 1.2); rafaga += 2; destello(); });
+  sala.addEventListener('pointerdown', e => { const r = sala.getBoundingClientRect(); flash(e.clientX - r.left, e.clientY - r.top, 34, 1.2); rafaga += 2; destello(); });
   document.addEventListener('keydown', e => {
     if (e.target.closest('input')) return;
     if (e.key === 'Escape') { if (enVideo != null) return cerrarVideo(); if (vista === 'perfil') ir('lista'); return; }
@@ -602,6 +601,19 @@
     } catch { /* sin muestra, quedan los tonos por defecto */ }
   }
 
+  // ── El hero y los números
+  const seguidores = v => { const m = String(v || '').replace(',', '.').match(/([\d.]+)\s*([KM])?/i); return m ? parseFloat(m[1]) * (m[2]?.toUpperCase() === 'M' ? 1e6 : m[2] ? 1e3 : 1) : 0; };
+  const totalSeg = P.reduce((t, p) => t + seguidores(p.ig) + seguidores(p.tt) + seguidores(p.yt), 0);
+  const totalVideos = P.reduce((t, p) => t + p.videos.length, 0);
+  const todas = P.map((p, i) => i);
+  $('.hero__sub').textContent = `${P.length} creadores. ${marcas(todas)} marcas. Una pasarela.`;
+  $('.fichas').innerHTML = [
+    [`${Math.floor(totalSeg / 1e6)} M`, 'de seguidores, sumando Instagram, TikTok y YouTube de todos los creadores.'],
+    [String(totalVideos), 'videos de sus propios canales que muestran por qué cada dupla tiene sentido.'],
+    [String(marcas(todas)), `marcas del grupo, en sus ${DIVISIONES.length} divisiones: consumo, dermatológica, profesional y lujo.`],
+    ['1', 'creadora que ya recomienda CeraVe por su cuenta, hace cuatro años.'],
+  ].map(([n, t]) => `<article class="ficha"><b class="ficha__n">${n}</b><p class="ficha__t">${t}</p></article>`).join('');
+
   // ── Arranca
   let ultimo = performance.now();
   function cuadro(ahora) {
@@ -613,6 +625,7 @@
   ir('lista');
   medir();
   addEventListener('resize', () => { medir(); });
+  new ResizeObserver(() => medir()).observe(escenario);
   requestAnimationFrame(cuadro);
 
   (async () => {

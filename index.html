@@ -2,15 +2,15 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
   <title>Porque lo valen — L'Oréal Groupe × BIG</title>
   <meta name="description" content="El desfile de BIG para L'Oréal Groupe: creadores del roster, una marca del grupo cada uno y su salida a la pasarela.">
   <link rel="icon" href="assets/img/big.svg" type="image/svg+xml">
-  <link rel="preload" href="assets/fonts/outfit.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="styles.css?v=4">
-  <script src="perfiles.js?v=4" defer></script>
-  <script src="app.js?v=4" defer></script>
+  <link rel="preload" href="assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css?v=5">
+  <script src="perfiles.js?v=5" defer></script>
+  <script src="app.js?v=5" defer></script>
 </head>
 <body class="is-loading">
   <div class="loader" aria-hidden="true">
@@ -20,28 +20,60 @@
     </div>
   </div>
 
-  <!-- El escenario: la pasarela con su público, y arriba los creadores que desfilan -->
-  <div class="escenario" aria-label="La pasarela">
-    <canvas class="sala" aria-hidden="true"></canvas>
-    <div class="modelos"></div>
-    <div class="destellos" aria-hidden="true"></div>
-  </div>
+  <!-- La barra de arriba, fina y translúcida -->
+  <nav class="nav" aria-label="Secciones">
+    <div class="nav__in">
+      <a class="nav__marca" href="#inicio" aria-label="L'Oréal Groupe × BIG, al inicio">
+        <span>L'ORÉAL<small> GROUPE</small></span><i aria-hidden="true">×</i>
+        <svg viewBox="0 0 410.71 466.33" role="img" aria-label="BIG"><path d="M409.52,245.64l-.46-2.58c-9.26-60.88-80.63-99.4-137.14-71.74-88.45,35.5-151.22,123.57-151.14,223.45,0,3.49-.78,6.98-2.6,9.96-9.03,14.8-34.91,11.92-39.67-5.3-.81-2.92-.82-6-.26-8.97,21.94-117.86,112.53-218.09,223.62-260.77.71-.31,1.41-.64,2.1-1,52.05-30.85,35.16-119.08-25.55-127.52-4.12-.76-8.35-1.16-12.68-1.16H0v466.33h410.49c-.73-9.18,1.48-207.5-.97-220.69Z"/></svg>
+      </a>
+      <ul class="nav__links">
+        <li><a href="#desfile">El desfile</a></li>
+        <li><a href="#numeros">Los números</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
 
-  <header class="top">
-    <div class="marca" aria-label="L'Oréal Groupe × BIG">
-      <span class="marca__loreal">L'ORÉAL<small>GROUPE</small></span>
-      <i aria-hidden="true">×</i>
-      <svg class="marca__big" viewBox="0 0 410.71 466.33" role="img" aria-label="BIG"><path d="M409.52,245.64l-.46-2.58c-9.26-60.88-80.63-99.4-137.14-71.74-88.45,35.5-151.22,123.57-151.14,223.45,0,3.49-.78,6.98-2.6,9.96-9.03,14.8-34.91,11.92-39.67-5.3-.81-2.92-.82-6-.26-8.97,21.94-117.86,112.53-218.09,223.62-260.77.71-.31,1.41-.64,2.1-1,52.05-30.85,35.16-119.08-25.55-127.52-4.12-.76-8.35-1.16-12.68-1.16H0v466.33h410.49c-.73-9.18,1.48-207.5-.97-220.69Z"/></svg>
+  <!-- El hero -->
+  <header class="hero" id="inicio">
+    <p class="hero__eyebrow">L'Oréal Groupe × BIG</p>
+    <h1>Porque lo valen.</h1>
+    <p class="hero__sub"></p>
+    <div class="hero__ctas">
+      <a class="boton" href="#desfile">Armá el desfile</a>
+      <a class="enlace" href="#numeros">Mirá los números</a>
     </div>
   </header>
 
-  <div class="titular">
-    <p class="kicker">El desfile de BIG para L'Oréal Groupe</p>
-    <h1>Porque lo <em>valen.</em></h1>
-    <p class="titular__bajada">Tocá la pasarela para sacar fotos. Tocá a un creador para ver su salida.</p>
-  </div>
+  <!-- El configurador: la pasarela fija a la izquierda, las opciones a la derecha -->
+  <main class="config" id="desfile">
+    <div class="config__vista">
+      <div class="escenario" aria-label="La pasarela">
+        <canvas class="sala" aria-hidden="true"></canvas>
+        <div class="modelos"></div>
+        <div class="destellos" aria-hidden="true"></div>
+        <p class="escenario__pista">Tocá la pasarela para sacar fotos. Tocá a un creador para ver su salida.</p>
+      </div>
+    </div>
+    <aside class="app" aria-label="Armá el desfile"></aside>
+  </main>
 
-  <aside class="app" aria-label="Armá el desfile"></aside>
+  <!-- Los números, en fichas -->
+  <section class="numeros" id="numeros">
+    <h2>Los números.</h2>
+    <p class="numeros__sub">Lo que suma esta pasarela, contado desde sus propias redes.</p>
+    <div class="fichas"></div>
+  </section>
+
+  <footer class="pie-pagina" id="contacto">
+    <div class="pie-pagina__in">
+      <p>Propuesta creativa de BIG para L'Oréal Groupe Argentina. Las duplas, las historias y las marcas por creador son una propuesta: inversión, usos y fechas los definimos con ustedes.</p>
+      <p>Videos: canales públicos de YouTube de cada creador. Seguidores al momento de armar la propuesta.</p>
+      <p class="pie-pagina__contacto">¿Hablamos? Escribinos a <a href="mailto:contacto@bigagency.com.ar">contacto@bigagency.com.ar</a></p>
+      <p class="pie-pagina__legal">BIG · roster.bigagency.com.ar</p>
+    </div>
+  </footer>
 
   <noscript><p class="sin-js">Activá JavaScript para ver el desfile.</p></noscript>
 </body>
