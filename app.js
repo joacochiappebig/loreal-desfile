@@ -79,35 +79,35 @@
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
     // el fondo del salón y la pared del backstage
     let g = c.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#120f0d'); g.addColorStop(.45, '#1b1613'); g.addColorStop(1, '#070605');
+    g.addColorStop(0, '#0b0b0b'); g.addColorStop(.45, '#161616'); g.addColorStop(1, '#040404');
     c.fillStyle = g; c.fillRect(0, 0, W, H);
     for (let x = cx % 46 - 46; x < W; x += 46) { // cortinado
       g = c.createLinearGradient(x, 0, x + 46, 0);
-      g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,240,220,.035)'); g.addColorStop(1, 'rgba(0,0,0,.12)');
+      g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,255,255,.03)'); g.addColorStop(1, 'rgba(0,0,0,.12)');
       c.fillStyle = g; c.fillRect(x, techo, 46, horizonte - techo);
     }
     // la puerta por donde salen, con su luz
     const pz = Z_PUERTA, pw = CW * 1.5 / pz, ph = CH * 1.25 / pz, py = pisoY(pz);
     g = c.createRadialGradient(cx, py - ph / 2, 0, cx, py - ph / 2, ph * 3);
-    g.addColorStop(0, 'rgba(255,226,170,.45)'); g.addColorStop(1, 'rgba(255,226,170,0)');
+    g.addColorStop(0, 'rgba(242,205,149,.42)'); g.addColorStop(1, 'rgba(242,205,149,0)');
     c.fillStyle = g; c.fillRect(cx - ph * 3, py - ph * 3.5, ph * 6, ph * 4);
-    c.fillStyle = '#fff3dc'; c.fillRect(cx - pw / 2, py - ph, pw, ph);
+    c.fillStyle = '#fffaf1'; c.fillRect(cx - pw / 2, py - ph, pw, ph);
     // la parrilla de luces
     for (let i = 0; i < 9; i++) {
       const x = cx + (i - 4) * Math.min(W, 1100) * .1, y = techo + 22;
-      g = c.createRadialGradient(x, y, 0, x, y, 16); g.addColorStop(0, 'rgba(255,236,200,.9)'); g.addColorStop(1, 'rgba(255,236,200,0)');
+      g = c.createRadialGradient(x, y, 0, x, y, 16); g.addColorStop(0, 'rgba(255,250,240,.9)'); g.addColorStop(1, 'rgba(255,250,240,0)');
       c.fillStyle = g; c.fillRect(x - 16, y - 16, 32, 32);
     }
     // el piso del salón
     g = c.createLinearGradient(0, horizonte, 0, H);
-    g.addColorStop(0, '#1a1512'); g.addColorStop(1, '#050404');
+    g.addColorStop(0, '#151515'); g.addColorStop(1, '#030303');
     c.fillStyle = g; c.fillRect(0, horizonte, W, H - horizonte);
     // la pasarela
     const borde = (z, s) => [cx + s * R / z, pisoY(z)];
     const zc = .45;
     c.beginPath(); c.moveTo(...borde(Z_PUERTA, -1)); c.lineTo(...borde(Z_PUERTA, 1)); c.lineTo(...borde(zc, 1)); c.lineTo(...borde(zc, -1)); c.closePath();
     g = c.createLinearGradient(0, horizonte, 0, H);
-    g.addColorStop(0, '#5f574f'); g.addColorStop(.35, '#cfc6bb'); g.addColorStop(1, '#f7f2eb');
+    g.addColorStop(0, '#5a5a5a'); g.addColorStop(.35, '#cfcfcf'); g.addColorStop(1, '#ffffff');
     c.fillStyle = g; c.fill();
     // el brillo del piso laqueado
     c.beginPath(); c.moveTo(...borde(Z_PUERTA, -.25)); c.lineTo(...borde(Z_PUERTA, .25)); c.lineTo(...borde(zc, .25)); c.lineTo(...borde(zc, -.25)); c.closePath();
@@ -117,7 +117,7 @@
     // las luces de los bordes
     for (let z = 1; z <= Z_PUERTA; z += .45) for (const s of [-1, 1]) {
       const [x, y] = borde(z, s * 1.02), r = Math.max(1, 5 / z);
-      g = c.createRadialGradient(x, y, 0, x, y, r * 4); g.addColorStop(0, 'rgba(255,214,140,.95)'); g.addColorStop(1, 'rgba(255,214,140,0)');
+      g = c.createRadialGradient(x, y, 0, x, y, r * 4); g.addColorStop(0, 'rgba(242,205,149,.95)'); g.addColorStop(1, 'rgba(242,205,149,0)');
       c.fillStyle = g; c.fillRect(x - r * 4, y - r * 4, r * 8, r * 8);
     }
     // el público, sentado a los costados: de atrás hacia adelante
@@ -129,13 +129,13 @@
     for (const a of asientos) {
       const k = 1 / a.z, y = pisoY(a.z) - CH * .5 * k, r = CW * .085 * k;
       if (a.x < -r * 4 || a.x > W + r * 4) continue;
-      c.fillStyle = '#0b0908';
+      c.fillStyle = '#080808';
       c.beginPath(); c.ellipse(a.x, y + r * 2.6, r * 2.1, r * 1.6, 0, Math.PI, 0); c.fill();
       c.fillRect(a.x - r * 2.1, y + r * 2.6, r * 4.2, CH * .5 * k);
       c.beginPath(); c.arc(a.x, y, r, 0, 7); c.fill();
       // la luz de la pasarela les toca el costado de la cara
       const lado = a.x < cx ? 1 : -1, luz = c.createRadialGradient(a.x + lado * r * .7, y, 0, a.x + lado * r * .7, y, r * 1.1);
-      luz.addColorStop(0, `rgba(255,222,180,${.16 * clamp(1.5 - a.z / 7)})`); luz.addColorStop(1, 'rgba(255,222,180,0)');
+      luz.addColorStop(0, `rgba(255,244,228,${.16 * clamp(1.5 - a.z / 7)})`); luz.addColorStop(1, 'rgba(255,244,228,0)');
       c.fillStyle = luz; c.beginPath(); c.arc(a.x, y, r, 0, 7); c.fill();
       if (a.z > 1.6 && Math.random() < .1) { // un celular grabando
         const pw = r * .5, ph = r * .85, px = a.x + lado * r * 1.25, py = y - ph * .1;
@@ -151,11 +151,11 @@
     for (const s of [-1, 1]) {
       const ox = cx + s * Math.min(W * .5, 700), oy = techo, tx = cx, ty = pisoY(1.6);
       g = c.createLinearGradient(ox, oy, tx, ty);
-      g.addColorStop(0, 'rgba(255,236,200,.10)'); g.addColorStop(1, 'rgba(255,236,200,.02)');
+      g.addColorStop(0, 'rgba(255,250,240,.10)'); g.addColorStop(1, 'rgba(255,250,240,.02)');
       c.fillStyle = g; c.beginPath(); c.moveTo(ox - 20, oy); c.lineTo(ox + 20, oy); c.lineTo(tx + s * R * .9, ty); c.lineTo(tx - s * R * .9, ty); c.closePath(); c.fill();
     }
     g = c.createRadialGradient(cx, pisoY(1.6), 0, cx, pisoY(1.6), R * 1.4);
-    g.addColorStop(0, 'rgba(255,240,215,.22)'); g.addColorStop(1, 'rgba(255,240,215,0)');
+    g.addColorStop(0, 'rgba(255,250,240,.22)'); g.addColorStop(1, 'rgba(255,250,240,0)');
     c.fillStyle = g; c.fillRect(cx - R * 1.4, pisoY(1.6) - R * 1.4, R * 2.8, R * 2.8);
     c.globalCompositeOperation = 'source-over';
   }
@@ -179,9 +179,9 @@
     if (vista === 'perfil') { // las marcas en el piso donde se frena
       MARCAS.forEach((z, k) => {
         const y = pisoY(z), w = G.R * .5 / z, h = Math.max(2, 7 / z), on = k === momento, ok = k < momento;
-        ctx.fillStyle = on ? '#c9a35a' : ok ? 'rgba(201,163,90,.55)' : 'rgba(20,16,13,.35)';
+        ctx.fillStyle = on ? '#000' : ok ? 'rgba(0,0,0,.45)' : 'rgba(0,0,0,.18)';
         ctx.fillRect(G.cx - w / 2, y - h / 2, w, h);
-        ctx.font = `600 ${Math.max(9, 22 / z)}px Inter, sans-serif`; ctx.textAlign = 'center';
+        ctx.font = `700 ${Math.max(9, 22 / z)}px Outfit, Arial, sans-serif`; ctx.textAlign = 'center';
         ctx.fillText(String(k + 1), G.cx + w / 2 + Math.max(10, 26 / z), y + Math.max(3, 7 / z));
       });
     }
@@ -223,7 +223,7 @@
   }
   // el cuerpo: ropa en el color de su marca; manos y cuello con el tono de piel de su foto
   function figura(p, i) {
-    const c = p.color, d = mezclar(c, '#000000', .45), piel = p._piel || '#d4a07f', zap = '#15110e', oro = '#c9a35a';
+    const c = p.color, d = mezclar(c, '#000000', .45), piel = p._piel || '#d4a07f', zap = '#111111', oro = '#e8c58c';
     const est = ESTILOS[i % ESTILOS.length];
     const pant = est === 'tapado' ? '#231d18' : est === 'mono' ? c : d;
     const pierna = lado => {
@@ -377,7 +377,7 @@
         <div class="t__marca" style="--c:${p.color}"><i class="punto"></i><div><span>${divDe(p.division).nombre} · ${esc(p.rubro)}</span><b>${esc(p.marca)}</b><i>${esc(p.linea)}</i></div></div>
         <div class="t__redes">${redes(p).map(r => `<a href="${p.links[r]}" target="_blank" rel="noopener" aria-label="${RED[r]}: ${p[r]} seguidores">${ICON[r]}${p[r]}</a>`).join('')}</div>
         <p class="t__prueba"><b>Ya lo hace</b><span>${esc(p.prueba)}</span></p>
-        <h3 class="t__titulo">${esc(p.titulo)}</h3>
+        <h3 class="t__titulo"><span>${esc(p.titulo)}</span></h3>
         <ol class="pasos">${MOMENTOS.map((m, j) => `<li><button class="paso" type="button" data-m="${j}"><span class="paso__n">${j + 1}</span><span class="paso__c"><b>${m}</b><span>${esc(p.momentos[j])}</span></span></button></li>`).join('')}</ol>
         <h4 class="t__sub">${p.videos.length ? 'En sus redes' : 'Su contenido'}</h4>
         <div class="videos">${tiles || perfiles}</div>
