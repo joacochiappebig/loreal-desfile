@@ -46,19 +46,22 @@ button:disabled{cursor:default;opacity:.4}
 .destellos.is-flash{animation:flash .35s ease-out}
 @keyframes flash{from{opacity:.55}to{opacity:0}}
 
-/* cada creador es una tarjeta vertical que camina por la pasarela */
-.modelo{--cw:200px;--ch:356px;position:absolute;left:0;top:0;width:var(--cw);height:var(--ch);transform-origin:50% 100%;pointer-events:auto;cursor:pointer;will-change:transform,opacity}
-.modelo__marco{position:absolute;inset:0;overflow:hidden;border-radius:16px;background:#2a2420;box-shadow:0 30px 60px -20px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.08);-webkit-box-reflect:below 6px linear-gradient(transparent 72%,rgba(255,255,255,.22))}
-.modelo__marco img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.modelo__marco::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent 30%,transparent 62%,rgba(10,8,6,.82));pointer-events:none}
-.modelo__rotulo{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:0 14px 14px;display:flex;flex-direction:column;gap:3px;pointer-events:none}
-.modelo__rotulo b{font:500 21px/1.05 var(--serif);color:#fff}
-.modelo__rotulo span{font:600 9.5px/1.3 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--oro)}
-.modelo__n{position:absolute;z-index:2;top:12px;left:12px;padding:4px 8px;border-radius:99px;background:rgba(14,12,11,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font-size:10.5px;font-weight:700;letter-spacing:.1em;color:#fff;pointer-events:none}
-.modelo__video{position:absolute;z-index:3;inset:0;width:100%;height:100%;border:0;background:#000}
-.modelo.is-elegido .modelo__marco{box-shadow:0 40px 80px -24px rgba(0,0,0,.9),0 0 0 2px var(--oro)}
-.modelo.is-video .modelo__rotulo,.modelo.is-video .modelo__n{opacity:0}
-.modelo:hover .modelo__marco{box-shadow:0 30px 60px -20px rgba(0,0,0,.8),0 0 0 2px rgba(201,163,90,.8)}
+/* cada creador es una figura ilustrada con su cara, que camina por la pasarela */
+.modelo{position:absolute;left:0;top:0;transform-origin:50% 100%;pointer-events:auto;cursor:pointer;will-change:transform,opacity}
+.modelo__cuerpo{position:absolute;inset:0;-webkit-box-reflect:below -2px linear-gradient(transparent 78%,rgba(255,255,255,.2))}
+.fig{position:absolute;inset:0;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 18px 24px rgba(0,0,0,.45))}
+.fig__pierna,.fig__brazo,.fig__torso{transform-box:fill-box;transform-origin:50% 0}
+.modelo__cabeza{position:absolute;left:25%;top:0;width:50%;height:21.1%;border-radius:50% 50% 48% 48% / 46% 46% 54% 54%;background-color:#2a211b;background-repeat:no-repeat;box-shadow:0 6px 14px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.12)}
+.modelo__cabeza::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse at 50% 30%,color-mix(in srgb,var(--pelo) 82%,#fff),var(--pelo) 70%);opacity:0;transition:opacity .35s}
+.modelo.de-espaldas .modelo__cabeza::after{opacity:1}
+.modelo.de-espaldas .fig{filter:drop-shadow(0 18px 24px rgba(0,0,0,.45)) brightness(.72)}
+.modelo__sombra{position:absolute;left:12%;right:12%;bottom:-2.5%;height:5%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.45),transparent);transition:background .4s}
+.modelo.is-elegido .modelo__sombra{left:-10%;right:-10%;height:7%;bottom:-3.5%;background:radial-gradient(closest-side,rgba(201,163,90,.75),rgba(201,163,90,.15) 65%,transparent)}
+.modelo.is-elegido .modelo__cabeza{box-shadow:0 6px 14px rgba(0,0,0,.35),0 0 0 2px var(--oro)}
+.modelo:hover .modelo__cabeza{box-shadow:0 6px 14px rgba(0,0,0,.35),0 0 0 2px rgba(201,163,90,.85)}
+.modelo__etiqueta{position:absolute;left:50%;bottom:calc(100% + 4px);display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 12px;border-radius:12px;background:rgba(14,12,11,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);white-space:nowrap;transform:translateX(-50%);opacity:0;pointer-events:none;transition:opacity .3s}
+.modelo__etiqueta b{font:500 22px/1.05 var(--serif);color:#fff}
+.modelo__etiqueta span{font:600 11px/1.3 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--oro)}
 
 /* ── Arriba */
 .top{position:fixed;z-index:10;top:0;left:0;right:0;height:var(--top);display:flex;align-items:center;padding:0 var(--pad);pointer-events:none}

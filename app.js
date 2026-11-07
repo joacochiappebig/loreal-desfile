@@ -62,8 +62,8 @@
     const alto = piso - techo;
     const horizonte = techo + alto * (movil ? .36 : .44);
     const base = piso - (movil ? 2 : alto * .025);
-    const CH = (base - horizonte) * (movil ? 1.06 : 1.12), CW = CH * 9 / 16;
-    G = { W, H, movil, x1, cx: x1 / 2, techo, piso, horizonte, base, CH, CW, R: CW * .8 };
+    const CH = (base - horizonte) * (movil ? 1.06 : 1.12), CA = CH * 9 / 16, CW = CH * 100 / 280;
+    G = { W, H, movil, x1, cx: x1 / 2, techo, piso, horizonte, base, CH, CW, CA, R: CA * .8 };
     dpr = Math.min(2, devicePixelRatio || 1);
     sala.width = Math.round(W * dpr); sala.height = Math.round(H * dpr);
     capa.style.setProperty('--cw', `${CW}px`); capa.style.setProperty('--ch', `${CH}px`);
@@ -72,7 +72,7 @@
   }
 
   function pintarFondo() {
-    const { W, H, cx, horizonte, R, CW, CH, techo } = G;
+    const { W, H, cx, horizonte, R, CA: CW, CH, techo } = G;
     fondo = document.createElement('canvas');
     fondo.width = sala.width; fondo.height = sala.height;
     const c = fondo.getContext('2d');
@@ -206,21 +206,71 @@
     ctx.globalCompositeOperation = 'source-over';
   }
 
-  // ══ Los creadores en la pasarela ══
-  const caminantes = new Map(); // i → { el, z, xw, a, estado, t, fase, destino }
-  const encuadre = p => { const [x, , a] = rostroDe(p), vis = (9 / 16) / (2 / 3); return `${clamp((x + a / 2 - vis / 2) / (1 - vis)) * 100}% 40%`; };
+  // ══ Los creadores en la pasarela: figuras ilustradas con la cara de cada uno ══
+  const caminantes = new Map(); // i → { el, z, xw, a, estado, t, fase, destino, partes }
+  const ESTILOS = ['tapado', 'mono', 'traje'];
+  const mezclar = (a, b, k) => { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16), c = d => Math.round(((pa >> d) & 255) * (1 - k) + ((pb >> d) & 255) * k); return `rgb(${c(16)},${c(8)},${c(0)})`; };
+  // la cabeza: un óvalo recortado de su foto, con un poco de pelo alrededor de la cara
+  function cabeza(p) {
+    const [x, y, a, b] = rostroDe(p), PW = 600, PH = 900, ar = 44 / 52;
+    const cx = x + a / 2, cy = y + b * .47;
+    let wpx = Math.max(a * PW * 1.06, b * PH * 1.02 * ar), hpx = wpx / ar;
+    if (hpx > PH) { hpx = PH; wpx = hpx * ar; }
+    if (wpx > PW) { wpx = PW; hpx = wpx / ar; }
+    const A = wpx / PW, B = hpx / PH;
+    const px = A < 1 ? clamp((cx - A / 2) / (1 - A)) * 100 : 50, py = B < 1 ? clamp((cy - B / 2) / (1 - B)) * 100 : 50;
+    return `background-image:url(${foto(p)});background-size:${100 / A}% ${100 / B}%;background-position:${px}% ${py}%`;
+  }
+  // el cuerpo: ropa en el color de su marca; manos y cuello con el tono de piel de su foto
+  function figura(p, i) {
+    const c = p.color, d = mezclar(c, '#000000', .45), piel = p._piel || '#d4a07f', zap = '#15110e', oro = '#c9a35a';
+    const est = ESTILOS[i % ESTILOS.length];
+    const pant = est === 'tapado' ? '#231d18' : est === 'mono' ? c : d;
+    const pierna = lado => {
+      const ancho = est === 'mono' ? 17 : 15, x = lado < 0 ? 50 - ancho - 1 : 51;
+      const pie = est === 'mono' ? `l${lado < 0 ? -4 : 4} 116h${lado < 0 ? 25 : -25}` : `l${lado < 0 ? 4 : -4} 116h${lado < 0 ? 7 : -7}`;
+      const xp = lado < 0 ? x : x + ancho, cxz = x + ancho / 2 + (est === 'mono' ? 0 : lado * -1.5);
+      return `<g class="fig__pierna"><path d="M${xp} 146${pie}L${lado < 0 ? x + ancho : x} 146Z" fill="${pant}"/><path d="M${cxz - 7} 268q0-7 7-7t8 6q-1 3-8 3t-7-2z" fill="${zap}"/></g>`;
+    };
+    const cuello = `<rect x="44.5" y="48" width="11" height="20" rx="5" fill="${piel}"/>`;
+    const hombros = 'M25 64Q50 57 75 64Q82 66 82 76';
+    const torsos = {
+      tapado: `${cuello}<path d="${hombros}L84 150L81 206H19L16 150L18 76Q18 66 25 64Z" fill="${c}"/><path d="M50 63L42 100M50 63L58 100" stroke="${d}" stroke-width="2.5" fill="none"/><path d="M18 128H82V135H18Z" fill="${d}"/><path d="M50 135V206" stroke="${d}" stroke-width="1.5"/>`,
+      mono: `${cuello}<path d="${hombros}L73 128L77 152H23L27 128L18 76Q18 66 25 64Z" fill="${c}"/><path d="M44 63L50 86L56 63Z" fill="${piel}"/><rect x="26" y="125" width="48" height="7" rx="2" fill="${oro}"/>`,
+      traje: `${cuello}<path d="${hombros}L75 128L78 166H22L25 128L18 76Q18 66 25 64Z" fill="${c}"/><path d="M42 63L50 108L58 63Z" fill="#f3eee6"/><path d="M42 63L50 108M58 63L50 108" stroke="${d}" stroke-width="2.5"/><circle cx="50" cy="122" r="2.2" fill="${oro}"/><circle cx="50" cy="137" r="2.2" fill="${oro}"/>`,
+    };
+    const brazo = lado => {
+      const x = lado < 0 ? 12 : 76, f = lado < 0 ? `M${x + 2} 70Q${x + 7} 62 ${x + 12} 68L${x + 10} 148Q${x + 6} 151 ${x + 3} 148Z` : `M${x} 68Q${x + 5} 62 ${x + 10} 70L${x + 9} 148Q${x + 6} 151 ${x + 2} 148Z`;
+      return `<g class="fig__brazo"><path d="${f}" fill="${c}"/><path d="${f}" fill="${d}" opacity=".22" transform="translate(${lado < 0 ? -2 : 2} 0) scale(1 1)"/><circle cx="${x + 6}" cy="153" r="5.5" fill="${piel}"/></g>`;
+    };
+    return `<svg class="fig" viewBox="0 0 100 280" aria-hidden="true">${pierna(-1)}${pierna(1)}<g class="fig__torso">${torsos[est]}</g>${brazo(-1)}${brazo(1)}</svg>`;
+  }
   function crearCaminante(i) {
     const p = P[i], el = document.createElement('div');
     el.className = 'modelo'; el.dataset.i = i;
     el.setAttribute('role', 'button'); el.setAttribute('aria-label', `${p.nombre} × ${p.marca}`); el.tabIndex = -1;
     el.style.width = `${G.CW}px`; el.style.height = `${G.CH}px`;
-    el.innerHTML = `<div class="modelo__marco"><img src="${foto(p)}" alt="" style="object-position:${encuadre(p)}" draggable="false"><span class="modelo__n"></span><div class="modelo__rotulo"><span>${esc(p.marca)}</span><b>${esc(p.nombre)}</b></div></div>`;
+    el.style.setProperty('--pelo', p._pelo || '#2a211b');
+    el.innerHTML = `<i class="modelo__sombra"></i><div class="modelo__cuerpo">${figura(p, i)}<i class="modelo__cabeza" style="${cabeza(p)}"></i></div><span class="modelo__etiqueta"><b>${esc(p.nombre)}</b><span></span></span>`;
     capa.appendChild(el);
-    const w = { i, el, z: Z_PUERTA, xw: -G.R * .3, elev: 0, a: 0, estado: 'entra', t: 0, fase: Math.random() * 6, destino: null };
+    const [piernaI, piernaD] = $$('.fig__pierna', el), [brazoI, brazoD] = $$('.fig__brazo', el);
+    const w = { i, el, z: Z_PUERTA, xw: -G.R * .3, elev: 0, a: 0, estado: 'entra', t: 0, fase: Math.random() * 6, destino: null,
+      partes: { piernaI, piernaD, brazoI, brazoD, torso: $('.fig__torso', el), etiqueta: $('.modelo__etiqueta', el), detalle: $('.modelo__etiqueta span', el) } };
     caminantes.set(i, w);
     return w;
   }
   function sacar(w) { w.el.remove(); caminantes.delete(w.i); }
+  // el paso: piernas que se alternan, brazos que acompañan; en la pose, una mano a la cintura
+  function animarCuerpo(w, camina) {
+    const { piernaI, piernaD, brazoI, brazoD, torso } = w.partes, sl = Math.sin(w.fase);
+    const li = camina ? Math.max(0, sl) : 0, ld = camina ? Math.max(0, -sl) : 0;
+    piernaI.style.transform = `translate(${li * 2.5}px,${-li * 6}px) scaleY(${1 - li * .08})`;
+    piernaD.style.transform = `translate(${-ld * 2.5}px,${-ld * 6}px) scaleY(${1 - ld * .08})`;
+    const pose = !camina && (w.estado === 'pose' || w.estado === 'va');
+    brazoI.style.transform = pose ? 'rotate(26deg) scaleY(.82)' : `rotate(${camina ? sl * 6 : 2}deg) scaleY(${1 - ld * .1})`;
+    brazoD.style.transform = pose ? 'rotate(-7deg)' : `rotate(${camina ? sl * 6 : -2}deg) scaleY(${1 - li * .1})`;
+    torso.style.transform = `translateX(${camina ? sl * 1.2 : 0}px)`;
+  }
 
   let ultimaSalida = -1e9, cola = 0;
   function moverDesfile(dt, ahora) {
@@ -264,8 +314,11 @@
       w.el.style.transform = `translate3d(${X - G.CW / 2}px,${Y - G.CH + bob}px,0) scale(${s}) rotate(${giro}deg)`;
       w.el.style.opacity = w.a;
       w.el.style.zIndex = Math.round(3000 - w.z * 200);
-      w.el.style.filter = w.estado === 'vuelve' ? 'brightness(.75)' : '';
-      const n = salida(w.i); w.el.querySelector('.modelo__n').textContent = n ? `SALIDA ${dos(n)}` : '';
+      w.el.classList.toggle('de-espaldas', w.estado === 'vuelve');
+      animarCuerpo(w, camina);
+      const n = salida(w.i), det = `${n ? `Salida ${dos(n)} · ` : ''}${P[w.i].marca}`;
+      if (w.partes.detalle.textContent !== det) w.partes.detalle.textContent = det;
+      w.partes.etiqueta.style.opacity = (vista === 'lista' || vista === 'desfile') && w.estado !== 'vuelve' ? clamp((3.2 - w.z) / 1.3) : 0;
     });
   }
   function irA(w, z, xw, alLlegar, elev = 0) { w.estado = 'va'; w.destino = [z, xw, elev]; w.llego = false; w.alLlegar = alLlegar; }
@@ -395,7 +448,7 @@
   }
   function ponerMomento(k) {
     momento = clamp(k, 0, MOMENTOS.length - 1);
-    cerrarVideo(false);
+    cerrarVideo();
     const v = $('.anillo__v', panel);
     if (v) { v.style.strokeDashoffset = 100 - (momento + 1) / MOMENTOS.length * 100; $('.anillo b', panel).textContent = momento + 1; }
     $$('.paso', panel).forEach((p, j) => { p.classList.toggle('is-on', j === momento); p.classList.toggle('is-ok', j < momento); p.setAttribute('aria-current', j === momento ? 'step' : 'false'); });
@@ -404,38 +457,26 @@
     pintarPie();
   }
 
-  // ── Sus videos: los verticales se ven en la tarjeta, en primer plano; los horizontales y en el celular, en un visor
+  // ── Sus videos: se ven en un visor sobre la pasarela
   let visor = null;
   function verVideo(k) {
     const p = P[actual], v = p.videos[k];
     if (!v) return;
-    cerrarVideo(false);
+    cerrarVideo();
     enVideo = k;
     $$('.video', panel).forEach((b, j) => b.classList.toggle('is-on', j === k));
-    const iframe = `<iframe src="${fuente(v)}" title="${esc(v.t)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
-    if (G.movil || !esVertical(v)) {
-      visor = document.createElement('div');
-      visor.className = `visor${esVertical(v) ? ' visor--v' : ''}`;
-      visor.innerHTML = `<div class="visor__caja">${iframe}</div><p class="visor__t">${esc(p.nombre)} · ${esc(v.t)}</p><button class="visor__cerrar" type="button" aria-label="Cerrar video">×</button>`;
-      visor.addEventListener('click', e => { if (e.target === visor || e.target.closest('.visor__cerrar')) cerrarVideo(); });
-      body.appendChild(visor);
-      return;
-    }
-    const w = protagonista();
-    irA(w, 1, 0, () => {
-      if (enVideo !== k) return;
-      w.el.classList.add('is-video');
-      w.el.querySelector('.modelo__marco').insertAdjacentHTML('beforeend', iframe.replace('<iframe', '<iframe class="modelo__video"'));
-    });
+    visor = document.createElement('div');
+    visor.className = `visor${esVertical(v) ? ' visor--v' : ''}`;
+    visor.innerHTML = `<div class="visor__caja"><iframe src="${fuente(v)}" title="${esc(v.t)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div><p class="visor__t">${esc(p.nombre)} · ${esc(v.t)}</p><button class="visor__cerrar" type="button" aria-label="Cerrar video">×</button>`;
+    visor.addEventListener('click', e => { if (e.target === visor || e.target.closest('.visor__cerrar')) cerrarVideo(); });
+    body.appendChild(visor);
+    rafaga += 6;
   }
-  function cerrarVideo(volver = true) {
+  function cerrarVideo() {
     if (enVideo == null) return;
     enVideo = null;
     visor?.remove(); visor = null;
-    $$('.modelo__video').forEach(f => f.remove());
-    $$('.modelo.is-video').forEach(m => m.classList.remove('is-video'));
     $$('.video', panel).forEach(b => b.classList.remove('is-on'));
-    if (volver && vista === 'perfil') irA(protagonista(), MARCAS[momento], 0);
   }
 
   function cambiar(i, d) {
@@ -447,7 +488,7 @@
   function ir(v) {
     const antes = vista;
     if (antes === 'perfil' && v !== 'perfil') {
-      cerrarVideo(false);
+      cerrarVideo();
       caminantes.forEach(w => { w.el.classList.remove('is-elegido'); if (w.estado === 'va') { w.estado = 'vuelve'; } });
     }
     if (antes === 'listo' && v !== 'listo') caminantes.forEach(w => { w.estado = 'fuera'; });
@@ -489,7 +530,7 @@
     const filasDe = [];
     for (let f = 0; f < filas; f++) {
       const m = Math.min(porFila, n - f * porFila);
-      let z = Math.max(1.55, m * G.CW * 1.06 / ancho);
+      let z = Math.max(1.55, m * G.CW * 1.16 / ancho);
       if (f) z = Math.max(z, zAnt * 1.22);
       // el pie de esta fila asoma por encima de las cabezas de la fila de adelante
       const pie = f ? pieAnt - altoAnt * .72 : pisoY(z), elev = (pisoY(z) - pie) * z;
@@ -498,7 +539,7 @@
     }
     sel.forEach((i, k) => {
       const f = filasDe.find(r => k >= r.desde && k < r.desde + r.m), j = k - f.desde;
-      const paso = G.CW * 1.04, x = (j - (f.m - 1) / 2) * paso;
+      const paso = G.CW * 1.14, x = (j - (f.m - 1) / 2) * paso;
       setTimeout(() => {
         if (caminantes.has(i)) sacar(caminantes.get(i));
         const w = crearCaminante(i);
@@ -541,6 +582,26 @@
     else if (e.key === 'ArrowLeft' && momento > 0) ponerMomento(momento - 1);
   });
 
+  // el tono de piel (mejillas y nariz, el del medio de los tres) y el del pelo, tomados de su foto
+  function muestrear(p, im) {
+    try {
+      const c = document.createElement('canvas'); c.width = 60; c.height = 90;
+      const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0, 60, 90);
+      const [fx, fy, a, b] = rostroDe(p);
+      const media = (u, v) => {
+        const d = x.getImageData(clamp(Math.round(u * 60) - 2, 0, 55), clamp(Math.round(v * 90) - 2, 0, 85), 5, 5).data;
+        let R = 0, V = 0, A = 0; for (let k = 0; k < d.length; k += 4) { R += d[k]; V += d[k + 1]; A += d[k + 2]; }
+        const n = d.length / 4; return [R / n | 0, V / n | 0, A / n | 0];
+      };
+      const luz = ([r, g, bl]) => r * .3 + g * .59 + bl * .11;
+      const piel = [media(fx + a * .3, fy + b * .62), media(fx + a * .7, fy + b * .62), media(fx + a * .5, fy + b * .58)].sort((m, n) => luz(n) - luz(m))[1];
+      const gris = Math.max(...piel) - Math.min(...piel) < 14 || piel[0] < piel[2]; // si cayó en el fondo o en la ropa, no es piel
+      const pelo = media(fx + a / 2, Math.max(.01, fy + b * .02));
+      if (!gris) p._piel = `rgb(${piel})`;
+      p._pelo = `rgb(${pelo})`;
+    } catch { /* sin muestra, quedan los tonos por defecto */ }
+  }
+
   // ── Arranca
   let ultimo = performance.now();
   function cuadro(ahora) {
@@ -557,7 +618,7 @@
   (async () => {
     const etapa = $('.carga__etapa'), barras = $$('.carga__barra b');
     const textos = ['Armando el backstage', 'Probando las luces', '¡A la pasarela!'];
-    const listo = Promise.all([document.fonts?.ready, ...P.map(p => new Promise(r => { const im = new Image(); im.onload = im.onerror = r; im.src = foto(p); }))]);
+    const listo = Promise.all([document.fonts?.ready, ...P.map(p => new Promise(r => { const im = new Image(); im.onload = () => { muestrear(p, im); r(); }; im.onerror = r; im.src = foto(p); }))]);
     for (let i = 0; i < textos.length; i++) {
       etapa.textContent = textos[i];
       etapa.classList.remove('is-nueva'); void etapa.offsetWidth; etapa.classList.add('is-nueva');
